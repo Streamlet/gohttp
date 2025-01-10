@@ -4,19 +4,19 @@ import (
 	"net/http"
 )
 
-type Router struct {
+type Router[T any] struct {
 	http.ServeMux
 	cacheProvider CacheProvider
-	customContext interface{}
+	customContext T
 }
 
-func NewRouter(cacheProvider CacheProvider, customContext interface{}) *Router {
-	return &Router{cacheProvider: cacheProvider, customContext: customContext}
+func NewRouter[T any](cacheProvider CacheProvider, customContext T) *Router[T] {
+	return &Router[T]{cacheProvider: cacheProvider, customContext: customContext}
 }
 
-func wrapHandler(handler func(Context), cacheProvider CacheProvider, customContext interface{}) func(http.ResponseWriter, *http.Request) {
+func wrapHandler[T any](handler func(Context[T]), cacheProvider CacheProvider, customContext T) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := newHttpContext(w, r, cacheProvider, customContext)
+		ctx := newHttpContext[T](w, r, cacheProvider, customContext)
 		defer ctx.Release()
 		defer func() {
 			if err := recover(); err != nil {
@@ -27,6 +27,6 @@ func wrapHandler(handler func(Context), cacheProvider CacheProvider, customConte
 	}
 }
 
-func (r *Router) Handle(pattern string, handler func(Context)) {
+func (r *Router[T]) Handle(pattern string, handler func(Context[T])) {
 	r.ServeMux.HandleFunc(pattern, wrapHandler(handler, r.cacheProvider, r.customContext))
 }

@@ -8,28 +8,28 @@ import (
 	"syscall"
 )
 
-type Application struct {
-	router *web.Router
+type Application[T any] struct {
+	router *web.Router[T]
 }
 
-func NewApplication(cacheProvider web.CacheProvider, customContext interface{}) *Application {
-	app := &Application{web.NewRouter(cacheProvider, customContext)}
+func NewApplication[T any](cacheProvider web.CacheProvider, customContext T) *Application[T] {
+	app := &Application[T]{web.NewRouter[T](cacheProvider, customContext)}
 	return app
 }
 
-func (app *Application) ServeSock(sock string) {
+func (app *Application[T]) ServeSock(sock string) {
 	errorChan := make(chan error)
 	srv := NewSockServer(sock, app.router, errorChan)
 	app.serveUntilExit(srv, errorChan, sock, 0)
 }
 
-func (app *Application) ServePort(port uint) {
+func (app *Application[T]) ServePort(port uint) {
 	errorChan := make(chan error)
 	srv := NewPortServer(port, app.router, errorChan)
 	app.serveUntilExit(srv, errorChan, "", port)
 }
 
-func (app *Application) serveUntilExit(srv HttpServer, errorChan chan error, sock string, port uint) {
+func (app *Application[T]) serveUntilExit(srv HttpServer, errorChan chan error, sock string, port uint) {
 	err := srv.Serve()
 	if err != nil {
 		log.Printf("Failed to start server: %s.", err.Error())
@@ -58,6 +58,6 @@ func (app *Application) serveUntilExit(srv HttpServer, errorChan chan error, soc
 	_ = srv.Shutdown()
 }
 
-func (app *Application) Handle(pattern string, handler func(web.Context)) {
+func (app *Application[T]) Handle(pattern string, handler func(web.Context[T])) {
 	app.router.Handle(pattern, handler)
 }

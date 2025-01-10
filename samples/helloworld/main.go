@@ -5,12 +5,12 @@ import (
 	"gohttp/web"
 )
 
-func HelloWorld(c web.Context) {
+func HelloWorld(c web.Context[interface{}]) {
 	c.String("Hello, World!")
 }
 
 func main() {
-	application := server.NewApplication(nil, nil)
+	application := server.NewApplication[interface{}](nil, nil)
 	application.Handle("/", HelloWorld)
 	application.ServePort(80)
 }

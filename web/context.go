@@ -33,26 +33,26 @@ type BasicContext interface {
 	Session() Session
 }
 
-type Context interface {
+type Context[T any] interface {
 	BasicContext
 	RequestReader
 	ResponseWriter
-	Custom() interface{}
+	Custom() T
 }
 
-type httpContext struct {
+type httpContext[T any] struct {
 	responseWriter http.ResponseWriter
 	request        *http.Request
 	cacheProvider  CacheProvider
 	session        Session
-	customContext  interface{}
+	customContext  T
 }
 
-func newHttpContext(w http.ResponseWriter, r *http.Request, cp CacheProvider, cc interface{}) *httpContext {
+func newHttpContext[T any](w http.ResponseWriter, r *http.Request, cp CacheProvider, cc T) *httpContext[T] {
 	if cp == nil {
 		cp = cache.NewMemoryCache()
 	}
-	return &httpContext{
+	return &httpContext[T]{
 		responseWriter: w,
 		request:        r,
 		cacheProvider:  cp,
@@ -60,17 +60,17 @@ func newHttpContext(w http.ResponseWriter, r *http.Request, cp CacheProvider, cc
 	}
 }
 
-func (c *httpContext) HttpRequest() *http.Request {
+func (c *httpContext[T]) HttpRequest() *http.Request {
 	return c.request
 }
 
-func (c *httpContext) HttpResponseWriter() http.ResponseWriter {
+func (c *httpContext[T]) HttpResponseWriter() http.ResponseWriter {
 	return c.responseWriter
 }
 
 const CookieSession = "SESSION"
 
-func (c *httpContext) Session() Session {
+func (c *httpContext[T]) Session() Session {
 	if c.session == nil && c.cacheProvider != nil {
 		var s Session
 		cookie, err := c.request.Cookie(CookieSession)
@@ -92,21 +92,21 @@ func (c *httpContext) Session() Session {
 	return c.session
 }
 
-func (c *httpContext) Release() {
+func (c *httpContext[T]) Release() {
 	if c.session != nil {
 		c.session = nil
 	}
 }
 
-func (c *httpContext) Custom() interface{} {
+func (c *httpContext[T]) Custom() T {
 	return c.customContext
 }
 
-func (c *httpContext) GetQueryStrings() map[string][]string {
+func (c *httpContext[T]) GetQueryStrings() map[string][]string {
 	return c.request.URL.Query()
 }
 
-func (c *httpContext) GetQueryStringValues(key string) []string {
+func (c *httpContext[T]) GetQueryStringValues(key string) []string {
 	v, ok := c.GetQueryStrings()[key]
 	if !ok {
 		return nil
@@ -114,7 +114,7 @@ func (c *httpContext) GetQueryStringValues(key string) []string {
 	return v
 }
 
-func (c *httpContext) GetQueryStringValue(key string) string {
+func (c *httpContext[T]) GetQueryStringValue(key string) string {
 	v := c.GetQueryStringValues(key)
 	if v == nil || len(v) == 0 {
 		return ""
@@ -122,7 +122,7 @@ func (c *httpContext) GetQueryStringValue(key string) string {
 	return v[0]
 }
 
-func (c *httpContext) GetRequestBodyAsBytes() ([]byte, error) {
+func (c *httpContext[T]) GetRequestBodyAsBytes() ([]byte, error) {
 	b, err := io.ReadAll(c.request.Body)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (c *httpContext) GetRequestBodyAsBytes() ([]byte, error) {
 	return b, nil
 }
 
-func (c *httpContext) GetRequestBodyAsStrings() (string, error) {
+func (c *httpContext[T]) GetRequestBodyAsStrings() (string, error) {
 	bytes, err := c.GetRequestBodyAsBytes()
 	if err != nil {
 		return "", err
@@ -138,7 +138,7 @@ func (c *httpContext) GetRequestBodyAsStrings() (string, error) {
 	return string(bytes), nil
 }
 
-func (c *httpContext) GetRequestBodyAsXml(v interface{}) error {
+func (c *httpContext[T]) GetRequestBodyAsXml(v interface{}) error {
 	bytes, err := c.GetRequestBodyAsBytes()
 	if err != nil {
 		return err
@@ -146,7 +146,7 @@ func (c *httpContext) GetRequestBodyAsXml(v interface{}) error {
 	return xml.Unmarshal(bytes, v)
 }
 
-func (c *httpContext) GetRequestBodyAsJson(v interface{}) error {
+func (c *httpContext[T]) GetRequestBodyAsJson(v interface{}) error {
 	bytes, err := c.GetRequestBodyAsBytes()
 	if err != nil {
 		return err
@@ -154,16 +154,16 @@ func (c *httpContext) GetRequestBodyAsJson(v interface{}) error {
 	return json.Unmarshal(bytes, v)
 }
 
-func (c *httpContext) HttpError(statusCode int) {
+func (c *httpContext[T]) HttpError(statusCode int) {
 	c.responseWriter.WriteHeader(statusCode)
 }
 
-func (c *httpContext) Redirect(url string) {
+func (c *httpContext[T]) Redirect(url string) {
 	c.responseWriter.Header().Add("Location", url)
 	c.responseWriter.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func (c *httpContext) String(response string) {
+func (c *httpContext[T]) String(response string) {
 	c.responseWriter.Header().Add("Content-Type", "text/plain; charset=utf-8")
 	c.responseWriter.WriteHeader(http.StatusOK)
 	_, err := c.responseWriter.Write([]byte(response))
@@ -172,7 +172,7 @@ func (c *httpContext) String(response string) {
 	}
 }
 
-func (c *httpContext) Xml(r interface{}) {
+func (c *httpContext[T]) Xml(r interface{}) {
 	xmlString, err := xml.Marshal(r)
 	if err != nil {
 		log.Println("failed to encode xml", err.Error(), r)
@@ -188,7 +188,7 @@ func (c *httpContext) Xml(r interface{}) {
 	}
 }
 
-func (c *httpContext) Json(r interface{}) {
+func (c *httpContext[T]) Json(r interface{}) {
 	jsonString, err := json.Marshal(r)
 	if err != nil {
 		log.Println("failed to encode json", err.Error(), r)
