@@ -1,4 +1,4 @@
-package http
+package web
 
 import (
 	"encoding/json"
@@ -37,6 +37,7 @@ type Context interface {
 	BasicContext
 	RequestReader
 	ResponseWriter
+	Custom() interface{}
 }
 
 type httpContext struct {
@@ -44,9 +45,10 @@ type httpContext struct {
 	request        *http.Request
 	cacheProvider  CacheProvider
 	session        Session
+	customContext  interface{}
 }
 
-func newHttpContext(w http.ResponseWriter, r *http.Request, cp CacheProvider) *httpContext {
+func newHttpContext(w http.ResponseWriter, r *http.Request, cp CacheProvider, cc interface{}) *httpContext {
 	if cp == nil {
 		cp = cache.NewMemoryCache()
 	}
@@ -54,6 +56,7 @@ func newHttpContext(w http.ResponseWriter, r *http.Request, cp CacheProvider) *h
 		responseWriter: w,
 		request:        r,
 		cacheProvider:  cp,
+		customContext:  cc,
 	}
 }
 
@@ -93,6 +96,10 @@ func (c *httpContext) Release() {
 	if c.session != nil {
 		c.session = nil
 	}
+}
+
+func (c *httpContext) Custom() interface{} {
+	return c.customContext
 }
 
 func (c *httpContext) GetQueryStrings() map[string][]string {

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"gohttp/http"
+	"gohttp/web"
 	"log"
 	"os"
 	"os/signal"
@@ -9,11 +9,11 @@ import (
 )
 
 type Application struct {
-	router *http.Router
+	router *web.Router
 }
 
-func NewApplication(cacheProvider http.CacheProvider) *Application {
-	app := &Application{http.NewRouter(cacheProvider)}
+func NewApplication(cacheProvider web.CacheProvider, customContext interface{}) *Application {
+	app := &Application{web.NewRouter(cacheProvider, customContext)}
 	return app
 }
 
@@ -58,6 +58,6 @@ func (app *Application) serveUntilExit(srv HttpServer, errorChan chan error, soc
 	_ = srv.Shutdown()
 }
 
-func (app *Application) Handle(pattern string, handler func(http.Context)) {
+func (app *Application) Handle(pattern string, handler func(web.Context)) {
 	app.router.Handle(pattern, handler)
 }
