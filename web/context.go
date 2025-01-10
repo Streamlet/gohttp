@@ -37,7 +37,7 @@ type Context[T any] interface {
 	BasicContext
 	RequestReader
 	ResponseWriter
-	Custom() T
+	Ext() T
 }
 
 type httpContext[T any] struct {
@@ -45,10 +45,10 @@ type httpContext[T any] struct {
 	request        *http.Request
 	cacheProvider  CacheProvider
 	session        Session
-	customContext  T
+	extContext     T
 }
 
-func newHttpContext[T any](w http.ResponseWriter, r *http.Request, cp CacheProvider, cc T) *httpContext[T] {
+func newHttpContext[T any](w http.ResponseWriter, r *http.Request, cp CacheProvider, ext T) *httpContext[T] {
 	if cp == nil {
 		cp = cache.NewMemoryCache()
 	}
@@ -56,7 +56,7 @@ func newHttpContext[T any](w http.ResponseWriter, r *http.Request, cp CacheProvi
 		responseWriter: w,
 		request:        r,
 		cacheProvider:  cp,
-		customContext:  cc,
+		extContext:     ext,
 	}
 }
 
@@ -98,8 +98,8 @@ func (c *httpContext[T]) Release() {
 	}
 }
 
-func (c *httpContext[T]) Custom() T {
-	return c.customContext
+func (c *httpContext[T]) Ext() T {
+	return c.extContext
 }
 
 func (c *httpContext[T]) GetQueryStrings() map[string][]string {

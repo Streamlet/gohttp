@@ -12,8 +12,8 @@ type Application[T any] struct {
 	router *web.Router[T]
 }
 
-func NewApplication[T any](cacheProvider web.CacheProvider, customContext T) *Application[T] {
-	app := &Application[T]{web.NewRouter[T](cacheProvider, customContext)}
+func NewApplication[T any](cacheProvider web.CacheProvider, extContext T) *Application[T] {
+	app := &Application[T]{web.NewRouter[T](cacheProvider, extContext)}
 	return app
 }
 

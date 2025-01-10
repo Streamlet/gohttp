@@ -5,23 +5,23 @@ import (
 	"gohttp/web"
 )
 
-type CustomContext interface {
-	CustomFunc() string
+type ExtContext interface {
+	ExtFunc() string
 }
 
-type customContext struct {
+type extContext struct {
 }
 
-func (cc customContext) CustomFunc() string {
-	return "custom_func"
+func (ex extContext) ExtFunc() string {
+	return "ext_func"
 }
 
-func CustomHandler(c web.Context[CustomContext]) {
-	c.String(c.Custom().CustomFunc())
+func ExtContextHandler(c web.Context[ExtContext]) {
+	c.String(c.Ext().ExtFunc())
 }
 
 func main() {
-	application := server.NewApplication[CustomContext](nil, &customContext{})
-	application.Handle("/", CustomHandler)
+	application := server.NewApplication[ExtContext](nil, &extContext{})
+	application.Handle("/", ExtContextHandler)
 	application.ServePort(80)
 }
