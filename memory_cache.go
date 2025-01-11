@@ -30,7 +30,7 @@ func (s *memoryCache) HExists(key, field string) bool {
 	if !ok {
 		return false
 	}
-	if !item.createTime.Add(item.expiration).After(time.Now()) {
+	if item.expiration > 0 && !item.createTime.Add(item.expiration).After(time.Now()) {
 		delete(session, field)
 		return false
 	}
@@ -46,7 +46,7 @@ func (s *memoryCache) HGet(key, field string) interface{} {
 	if !ok {
 		return false
 	}
-	if !item.createTime.Add(item.expiration).After(time.Now()) {
+	if item.expiration > 0 && !item.createTime.Add(item.expiration).After(time.Now()) {
 		delete(session, field)
 		return false
 	}
@@ -66,7 +66,7 @@ func (s *memoryCache) HDelete(key, field string) bool {
 	if !ok {
 		return false
 	}
-	if !item.createTime.Add(item.expiration).After(time.Now()) {
+	if item.expiration > 0 && !item.createTime.Add(item.expiration).After(time.Now()) {
 		delete(session, field)
 		return false
 	}
