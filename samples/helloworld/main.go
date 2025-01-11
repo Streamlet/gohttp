@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	application := gohttp.NewApplication[gohttp.HttpContext](gohttp.NewDefaultFactory(nil))
+	application := gohttp.NewApplication[gohttp.HttpContext](gohttp.NewContextFactory(nil))
 	application.Handle("/", HelloWorld)
 	application.ServePort(80)
 }

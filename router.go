@@ -13,7 +13,7 @@ type ContextFactory[T HttpContext] interface {
 	NewContext(w http.ResponseWriter, r *http.Request) T
 }
 
-func NewDefaultFactory(cp CacheProvider) ContextFactory[HttpContext] {
+func NewContextFactory(cp CacheProvider) ContextFactory[HttpContext] {
 	if cp == nil {
 		cp = newMemoryCache()
 	}
