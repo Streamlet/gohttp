@@ -1,0 +1,40 @@
+package main
+
+import (
+	"context"
+	"github.com/Streamlet/gohttp"
+	"github.com/redis/go-redis/v9"
+	"log"
+)
+
+func GetRedisClient() (*redis.Client, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:     "127.0.0.1:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+	_, err := client.Ping(context.Background()).Result()
+	if err != nil {
+		_ = client.Close()
+		return nil, err
+	}
+	return client, nil
+}
+
+func main() {
+	cache, err := GetRedisClient()
+	if err != nil {
+		log.Print("failed to connect to redis: ", err.Error())
+		return
+	}
+	db, err := GetConnection("mysql", "root@tcp(localhost)/mysql?charset=latin1&loc=Local&parseTime=True")
+	if err != nil {
+		log.Print("failed to connect to mysql: ", err.Error())
+		return
+	}
+	application := gohttp.NewApplication[HttpContext](NewContextFactory(cache, db))
+	application.Handle("/redis_get", RedisGetHandler)
+	application.Handle("/redis_set", RedisSetHandler)
+	application.Handle("/db", DbHandler)
+	application.ServePort(80)
+}
