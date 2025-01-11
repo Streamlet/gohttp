@@ -9,7 +9,7 @@ func HelloWorld(c gohttp.HttpContext) {
 }
 
 func main() {
-	application := gohttp.NewApplication[gohttp.HttpContext](gohttp.NewHttpContext, nil)
+	application := gohttp.NewApplication[gohttp.HttpContext](gohttp.NewDefaultFactory(nil))
 	application.Handle("/", HelloWorld)
 	application.ServePort(80)
 }

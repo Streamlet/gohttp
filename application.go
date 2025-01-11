@@ -13,8 +13,8 @@ type Application[T HttpContext] interface {
 	Handle(pattern string, handler func(T))
 }
 
-func NewApplication[T HttpContext](contextFactory ContextFactory[T], cacheProvider CacheProvider) Application[T] {
-	return &application[T]{NewRouter[T](cacheProvider, contextFactory)}
+func NewApplication[T HttpContext](contextFactory ContextFactory[T]) Application[T] {
+	return &application[T]{NewRouter[T](contextFactory)}
 }
 
 type application[T HttpContext] struct {

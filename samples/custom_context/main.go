@@ -10,9 +10,17 @@ type CustomContext interface {
 	Custom() string
 }
 
-func NewContext(w http.ResponseWriter, r *http.Request, sm gohttp.SessionManager) CustomContext {
+func NewContextFactory() gohttp.ContextFactory[CustomContext] {
+	return &contextFactory{gohttp.NewSessionManager(nil)}
+}
+
+type contextFactory struct {
+	sm gohttp.SessionManager
+}
+
+func (cf *contextFactory) NewContext(w http.ResponseWriter, r *http.Request) CustomContext {
 	return &customContext{
-		gohttp.NewHttpContext(w, r, sm),
+		gohttp.NewHttpContext(w, r, cf.sm),
 	}
 }
 
@@ -29,7 +37,7 @@ func ExtContextHandler(c CustomContext) {
 }
 
 func main() {
-	application := gohttp.NewApplication[CustomContext](NewContext, nil)
+	application := gohttp.NewApplication[CustomContext](NewContextFactory())
 	application.Handle("/", ExtContextHandler)
 	application.ServePort(80)
 }

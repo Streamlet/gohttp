@@ -9,31 +9,44 @@ type RouterInterface[T HttpContext] interface {
 	Handle(pattern string, handler func(T))
 }
 
-func NewRouter[T HttpContext](cp CacheProvider, cf ContextFactory[T]) RouterInterface[T] {
+type ContextFactory[T HttpContext] interface {
+	NewContext(w http.ResponseWriter, r *http.Request) T
+}
+
+func NewDefaultFactory(cp CacheProvider) ContextFactory[HttpContext] {
 	if cp == nil {
 		cp = newMemoryCache()
 	}
-	return &router[T]{sessionManager: newSessionManager(cp), contextFactory: cf}
+	return &contextFactory{NewSessionManager(cp)}
+}
+
+type contextFactory struct {
+	sessionManager SessionManager
+}
+
+func (cf *contextFactory) NewContext(w http.ResponseWriter, r *http.Request) HttpContext {
+	return NewHttpContext(w, r, cf.sessionManager)
+}
+
+func NewRouter[T HttpContext](cf ContextFactory[T]) RouterInterface[T] {
+	return &router[T]{contextFactory: cf}
 }
 
 type router[T HttpContext] struct {
 	serveMux       http.ServeMux
-	sessionManager SessionManager
 	contextFactory ContextFactory[T]
 }
-
-type ContextFactory[T HttpContext] func(w http.ResponseWriter, r *http.Request, sm SessionManager) T
 
 func (rt *router[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	rt.serveMux.ServeHTTP(w, r)
 }
 func (rt *router[T]) Handle(pattern string, handler func(T)) {
-	rt.serveMux.HandleFunc(pattern, wrapHandler(handler, rt.sessionManager, rt.contextFactory))
+	rt.serveMux.HandleFunc(pattern, wrapHandler(handler, rt.contextFactory))
 }
 
-func wrapHandler[T HttpContext](handler func(T), sm SessionManager, cf ContextFactory[T]) func(http.ResponseWriter, *http.Request) {
+func wrapHandler[T HttpContext](handler func(T), cf ContextFactory[T]) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := cf(w, r, sm)
+		ctx := cf.NewContext(w, r)
 		defer func() {
 			if err := recover(); err != nil {
 				ctx.HttpError(http.StatusInternalServerError)

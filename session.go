@@ -20,7 +20,7 @@ type SessionManager interface {
 	CreateSession() (string, Session)
 }
 
-func newSessionManager(cacheProvider CacheProvider) SessionManager {
+func NewSessionManager(cacheProvider CacheProvider) SessionManager {
 	return &sessionManager{
 		cacheProvider,
 	}
