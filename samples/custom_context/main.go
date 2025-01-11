@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gohttp/server"
-	"gohttp/web"
+	"github.com/Streamlet/gohttp/server"
+	"github.com/Streamlet/gohttp/web"
 )
 
 type ExtContext interface {

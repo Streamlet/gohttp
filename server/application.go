@@ -1,7 +1,7 @@
 package server
 
 import (
-	"gohttp/web"
+	"github.com/Streamlet/gohttp/web"
 	"log"
 	"os"
 	"os/signal"

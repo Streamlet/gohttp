@@ -3,7 +3,7 @@ package web
 import (
 	"encoding/json"
 	"encoding/xml"
-	"gohttp/cache"
+	"github.com/Streamlet/gohttp/cache"
 	"io"
 	"log"
 	"net/http"
