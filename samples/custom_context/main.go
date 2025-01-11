@@ -1,27 +1,35 @@
 package main
 
 import (
-	"github.com/Streamlet/gohttp/server"
-	"github.com/Streamlet/gohttp/web"
+	"github.com/Streamlet/gohttp"
+	"net/http"
 )
 
-type ExtContext interface {
-	ExtFunc() string
+type CustomContext interface {
+	gohttp.HttpContext
+	Custom() string
 }
 
-type extContext struct {
+func NewContext(w http.ResponseWriter, r *http.Request, sm gohttp.SessionManager) CustomContext {
+	return &customContext{
+		gohttp.NewHttpContext(w, r, sm),
+	}
 }
 
-func (ex extContext) ExtFunc() string {
-	return "ext_func"
+type customContext struct {
+	gohttp.HttpContext
 }
 
-func ExtContextHandler(c web.Context[ExtContext]) {
-	c.String(c.Ext().ExtFunc())
+func (cc *customContext) Custom() string {
+	return "custom"
+}
+
+func ExtContextHandler(c CustomContext) {
+	c.String(c.Custom())
 }
 
 func main() {
-	application := server.NewApplication[ExtContext](nil, &extContext{})
+	application := gohttp.NewApplication[CustomContext](NewContext, nil)
 	application.Handle("/", ExtContextHandler)
 	application.ServePort(80)
 }

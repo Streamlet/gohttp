@@ -1,4 +1,4 @@
-package web
+package gohttp
 
 import (
 	"crypto/rand"
@@ -6,13 +6,6 @@ import (
 	"io"
 	"time"
 )
-
-type Session interface {
-	Exists(key string) bool
-	Get(key string) interface{}
-	Set(key string, value interface{}, expiration time.Duration)
-	Delete(key string) bool
-}
 
 type CacheProvider interface {
 	Exists(key string) bool
@@ -22,17 +15,32 @@ type CacheProvider interface {
 	HDelete(key, field string) bool
 }
 
-func GetSession(sessionId string, provider CacheProvider) Session {
-	if provider.Exists(sessionId) {
-		return newSession(sessionId, provider)
+type SessionManager interface {
+	GetSession(sessionId string) Session
+	CreateSession() (string, Session)
+}
+
+func newSessionManager(cacheProvider CacheProvider) SessionManager {
+	return &sessionManager{
+		cacheProvider,
+	}
+}
+
+type sessionManager struct {
+	cacheProvider CacheProvider
+}
+
+func (sm *sessionManager) GetSession(sessionId string) Session {
+	if sm.cacheProvider.Exists(sessionId) {
+		return newSession(sessionId, sm.cacheProvider)
 	} else {
 		return nil
 	}
 }
 
-func CreateSession(provider CacheProvider) (string, Session) {
+func (sm *sessionManager) CreateSession() (string, Session) {
 	sessionId := generateSessionId()
-	return sessionId, newSession(sessionId, provider)
+	return sessionId, newSession(sessionId, sm.cacheProvider)
 }
 
 func generateSessionId() string {

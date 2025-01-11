@@ -1,16 +1,15 @@
 package main
 
 import (
-	"github.com/Streamlet/gohttp/server"
-	"github.com/Streamlet/gohttp/web"
+	"github.com/Streamlet/gohttp"
 )
 
-func HelloWorld(c web.Context[interface{}]) {
+func HelloWorld(c gohttp.HttpContext) {
 	c.String("Hello, World!")
 }
 
 func main() {
-	application := server.NewApplication[interface{}](nil, nil)
+	application := gohttp.NewApplication[gohttp.HttpContext](gohttp.NewHttpContext, nil)
 	application.Handle("/", HelloWorld)
 	application.ServePort(80)
 }

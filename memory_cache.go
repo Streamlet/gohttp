@@ -1,27 +1,19 @@
-package cache
+package gohttp
 
 import "time"
 
-type MemoryCache interface {
-	Exists(key string) bool
-	HExists(key, field string) bool
-	HGet(key, field string) interface{}
-	HSet(key, field string, value interface{}, expiration time.Duration)
-	HDelete(key, field string) bool
-}
-
-type cacheItem struct {
-	data       interface{}
-	createTime time.Time
-	expiration time.Duration
+func newMemoryCache() CacheProvider {
+	return &memoryCache{map[string]map[string]cacheItem{}}
 }
 
 type memoryCache struct {
 	cache map[string]map[string]cacheItem
 }
 
-func NewMemoryCache() MemoryCache {
-	return &memoryCache{map[string]map[string]cacheItem{}}
+type cacheItem struct {
+	data       interface{}
+	createTime time.Time
+	expiration time.Duration
 }
 
 func (s *memoryCache) Exists(key string) bool {

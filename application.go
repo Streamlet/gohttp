@@ -1,35 +1,39 @@
-package server
+package gohttp
 
 import (
-	"github.com/Streamlet/gohttp/web"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
-type Application[T any] struct {
-	router *web.Router[T]
+type Application[T HttpContext] interface {
+	ServeSock(sock string)
+	ServePort(port uint)
+	Handle(pattern string, handler func(T))
 }
 
-func NewApplication[T any](cacheProvider web.CacheProvider, extContext T) *Application[T] {
-	app := &Application[T]{web.NewRouter[T](cacheProvider, extContext)}
-	return app
+func NewApplication[T HttpContext](contextFactory ContextFactory[T], cacheProvider CacheProvider) Application[T] {
+	return &application[T]{NewRouter[T](cacheProvider, contextFactory)}
 }
 
-func (app *Application[T]) ServeSock(sock string) {
+type application[T HttpContext] struct {
+	RouterInterface[T]
+}
+
+func (app *application[T]) ServeSock(sock string) {
 	errorChan := make(chan error)
-	srv := NewSockServer(sock, app.router, errorChan)
+	srv := NewSockServer(sock, app, errorChan)
 	app.serveUntilExit(srv, errorChan, sock, 0)
 }
 
-func (app *Application[T]) ServePort(port uint) {
+func (app *application[T]) ServePort(port uint) {
 	errorChan := make(chan error)
-	srv := NewPortServer(port, app.router, errorChan)
+	srv := NewPortServer(port, app, errorChan)
 	app.serveUntilExit(srv, errorChan, "", port)
 }
 
-func (app *Application[T]) serveUntilExit(srv HttpServer, errorChan chan error, sock string, port uint) {
+func (app *application[T]) serveUntilExit(srv HttpServer, errorChan chan error, sock string, port uint) {
 	err := srv.Serve()
 	if err != nil {
 		log.Printf("Failed to start server: %s.", err.Error())
@@ -56,8 +60,4 @@ func (app *Application[T]) serveUntilExit(srv HttpServer, errorChan chan error, 
 	}
 
 	_ = srv.Shutdown()
-}
-
-func (app *Application[T]) Handle(pattern string, handler func(web.Context[T])) {
-	app.router.Handle(pattern, handler)
 }
