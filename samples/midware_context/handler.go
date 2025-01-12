@@ -12,7 +12,7 @@ func RedisGetHandler(c HttpContext) {
 }
 
 func DbHandler(c HttpContext) {
-	rs, err := c.DB().db.Query("select Db from mysql.db;")
+	rs, err := c.DB().Query("select Db from mysql.db;")
 	if err != nil {
 		c.String(err.Error())
 		return
