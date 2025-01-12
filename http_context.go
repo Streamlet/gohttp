@@ -10,6 +10,7 @@ import (
 )
 
 type HttpContext interface {
+	io.Closer
 	BasicContext
 	RequestReader
 	ResponseWriter
@@ -58,6 +59,10 @@ type httpContext struct {
 	responseWriter http.ResponseWriter
 	request        *http.Request
 	sessionManager SessionManager
+}
+
+func (c *httpContext) Close() error {
+	return nil
 }
 
 func (c *httpContext) HttpRequest() *http.Request {

@@ -16,47 +16,47 @@ type redisCache struct {
 	sessionKeyPrefix string
 }
 
-func (s *redisCache) Exists(key string) bool {
-	if r, err := s.client.Exists(context.Background(), s.sessionKeyPrefix+key).Result(); err == nil && r > 0 {
+func (rc *redisCache) Exists(key string) bool {
+	if r, err := rc.client.Exists(context.Background(), rc.sessionKeyPrefix+key).Result(); err == nil && r > 0 {
 		return true
 	} else {
 		return false
 	}
 }
 
-func (s *redisCache) HExists(key, field string) bool {
-	if r, err := s.client.HExists(context.Background(), s.sessionKeyPrefix+key, field).Result(); err == nil && r {
+func (rc *redisCache) HExists(key, field string) bool {
+	if r, err := rc.client.HExists(context.Background(), rc.sessionKeyPrefix+key, field).Result(); err == nil && r {
 		return true
 	} else {
 		return false
 	}
 }
 
-func (s *redisCache) HGet(key, field string) interface{} {
-	if r, err := s.client.HGet(context.Background(), s.sessionKeyPrefix+key, field).Result(); err == nil {
+func (rc *redisCache) HGet(key, field string) interface{} {
+	if r, err := rc.client.HGet(context.Background(), rc.sessionKeyPrefix+key, field).Result(); err == nil {
 		return r
 	} else {
 		return nil
 	}
 }
 
-func (s *redisCache) HSet(key, field string, value interface{}, expiration time.Duration) {
-	if r, err := s.client.HSet(context.Background(), s.sessionKeyPrefix+key, field, value).Result(); err != nil || r <= 0 {
+func (rc *redisCache) HSet(key, field string, value interface{}, expiration time.Duration) {
+	if r, err := rc.client.HSet(context.Background(), rc.sessionKeyPrefix+key, field, value).Result(); err != nil || r <= 0 {
 		return
 	}
 
 	if expiration > 0 {
-		if r, err := s.client.Expire(context.Background(), s.sessionKeyPrefix+key, expiration).Result(); err != nil || !r {
+		if r, err := rc.client.Expire(context.Background(), rc.sessionKeyPrefix+key, expiration).Result(); err != nil || !r {
 			return
 		}
 	}
 }
 
-func (s *redisCache) HDelete(key, field string) bool {
-	if r, err := s.client.HExists(context.Background(), s.sessionKeyPrefix+key, field).Result(); err == nil && !r {
+func (rc *redisCache) HDelete(key, field string) bool {
+	if r, err := rc.client.HExists(context.Background(), rc.sessionKeyPrefix+key, field).Result(); err == nil && !r {
 		return true
 	}
-	if r, err := s.client.HDel(context.Background(), s.sessionKeyPrefix+key, field).Result(); err == nil && r > 0 {
+	if r, err := rc.client.HDel(context.Background(), rc.sessionKeyPrefix+key, field).Result(); err == nil && r > 0 {
 		return true
 	}
 	return false

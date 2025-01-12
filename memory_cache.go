@@ -16,13 +16,13 @@ type cacheItem struct {
 	expiration time.Duration
 }
 
-func (s *memoryCache) Exists(key string) bool {
-	_, ok := s.cache[key]
+func (mc *memoryCache) Exists(key string) bool {
+	_, ok := mc.cache[key]
 	return ok
 }
 
-func (s *memoryCache) HExists(key, field string) bool {
-	session, ok := s.cache[key]
+func (mc *memoryCache) HExists(key, field string) bool {
+	session, ok := mc.cache[key]
 	if !ok {
 		return false
 	}
@@ -37,8 +37,8 @@ func (s *memoryCache) HExists(key, field string) bool {
 	return ok
 }
 
-func (s *memoryCache) HGet(key, field string) interface{} {
-	session, ok := s.cache[key]
+func (mc *memoryCache) HGet(key, field string) interface{} {
+	session, ok := mc.cache[key]
 	if !ok {
 		return false
 	}
@@ -53,12 +53,12 @@ func (s *memoryCache) HGet(key, field string) interface{} {
 	return item.data
 }
 
-func (s *memoryCache) HSet(key, field string, value interface{}, expiration time.Duration) {
-	s.cache[key][field] = cacheItem{value, time.Now(), expiration}
+func (mc *memoryCache) HSet(key, field string, value interface{}, expiration time.Duration) {
+	mc.cache[key][field] = cacheItem{value, time.Now(), expiration}
 }
 
-func (s *memoryCache) HDelete(key, field string) bool {
-	session, ok := s.cache[key]
+func (mc *memoryCache) HDelete(key, field string) bool {
+	session, ok := mc.cache[key]
 	if !ok {
 		return false
 	}
