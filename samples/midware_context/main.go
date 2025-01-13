@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"database/sql"
+	"log"
+
 	"github.com/Streamlet/gohttp"
 	"github.com/redis/go-redis/v9"
-	"log"
 )
 
 func main() {

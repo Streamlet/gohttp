@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/Streamlet/gohttp"
 	"net/http"
+
+	"github.com/Streamlet/gohttp"
 )
 
 type HttpContext interface {

@@ -6,6 +6,7 @@ import (
 
 type RouterInterface[T HttpContext] interface {
 	http.Handler
+	RawHandle(pattern string, handler http.Handler)
 	Handle(pattern string, handler func(T))
 }
 
@@ -40,6 +41,11 @@ type router[T HttpContext] struct {
 func (rt *router[T]) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	rt.serveMux.ServeHTTP(w, r)
 }
+
+func (rt *router[T]) RawHandle(pattern string, handler http.Handler) {
+	rt.serveMux.Handle(pattern, handler)
+}
+
 func (rt *router[T]) Handle(pattern string, handler func(T)) {
 	rt.serveMux.HandleFunc(pattern, wrapHandler(handler, rt.contextFactory))
 }

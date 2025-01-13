@@ -2,6 +2,7 @@ package gohttp
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,6 +11,7 @@ import (
 type Application[T HttpContext] interface {
 	ServeSock(sock string)
 	ServePort(port uint)
+	RawHandle(pattern string, handler http.Handler)
 	Handle(pattern string, handler func(T))
 }
 
