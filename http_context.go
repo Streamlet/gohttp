@@ -85,7 +85,7 @@ func (c *httpContext) Session() Session {
 	if session == nil {
 		sid, session = c.sessionManager.CreateSession()
 		cookie := http.Cookie{Name: CookieSession, Value: sid, Path: "/"}
-		if c.request.URL.Scheme != "https" {
+		if c.request.URL.Scheme == "https" {
 			cookie.SameSite = http.SameSiteNoneMode
 			cookie.Secure = true
 		}
