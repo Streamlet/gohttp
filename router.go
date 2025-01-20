@@ -16,9 +16,9 @@ type ContextFactory[T HttpContext] interface {
 
 func NewContextFactory(cp CacheProvider) ContextFactory[HttpContext] {
 	if cp == nil {
-		cp = newMemoryCache()
+		return &contextFactory{sessionManager: nil}
 	}
-	return &contextFactory{NewSessionManager(cp)}
+	return &contextFactory{sessionManager: NewSessionManager(cp)}
 }
 
 type contextFactory struct {

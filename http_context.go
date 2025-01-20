@@ -76,6 +76,9 @@ func (c *httpContext) HttpResponseWriter() http.ResponseWriter {
 const CookieSession = "SESSION"
 
 func (c *httpContext) Session() Session {
+	if c.sessionManager == nil {
+		return nil
+	}
 	var session Session
 	cookie, err := c.request.Cookie(CookieSession)
 	if err == nil {

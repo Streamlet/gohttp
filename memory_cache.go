@@ -2,7 +2,7 @@ package gohttp
 
 import "time"
 
-func newMemoryCache() CacheProvider {
+func NewMemoryCache() CacheProvider {
 	return &memoryCache{map[string]map[string]cacheItem{}}
 }
 
