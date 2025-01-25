@@ -1,7 +1,9 @@
 package gohttp
 
 import (
+	"log"
 	"net/http"
+	"runtime/debug"
 )
 
 type RouterInterface[T HttpContext] interface {
@@ -55,6 +57,7 @@ func wrapHandler[T HttpContext](handler func(T), cf ContextFactory[T]) func(http
 		ctx := cf.NewContext(w, r)
 		defer func() {
 			if err := recover(); err != nil {
+				log.Println(err, string(debug.Stack()))
 				ctx.HttpError(http.StatusInternalServerError)
 			}
 		}()
