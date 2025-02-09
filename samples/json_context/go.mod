@@ -1,4 +1,4 @@
-module std_json_context
+module json_context
 
 go 1.18
 

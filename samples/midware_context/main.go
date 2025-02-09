@@ -21,7 +21,7 @@ func main() {
 		log.Print("failed to connect to redis: ", err.Error())
 		return
 	}
-	mysql, err := sql.Open("mysql", "root@tcp(localhost)/mysql?charset=latin1&loc=Local&parseTime=True")
+	mysql, err := sql.Open("mysql", "root@tcp(localhost)/mysql?charset=latin1&loc=Local&parseTime=True&clientFoundRows=true")
 	if err != nil {
 		log.Print("failed to connect to mysql: ", err.Error())
 		return

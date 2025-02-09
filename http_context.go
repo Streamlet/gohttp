@@ -34,7 +34,7 @@ type RequestReader interface {
 	GetQueryStringValues(key string) []string
 	GetQueryStringValue(key string) string
 	GetRequestBodyAsBytes() ([]byte, error)
-	GetRequestBodyAsStrings() (string, error)
+	GetRequestBodyAsString() (string, error)
 	GetRequestBodyAsXml(v interface{}) error
 	GetRequestBodyAsJson(v interface{}) error
 }
@@ -108,7 +108,7 @@ func (c *httpContext) GetQueryStringValues(key string) []string {
 
 func (c *httpContext) GetQueryStringValue(key string) string {
 	v := c.GetQueryStringValues(key)
-	if v == nil || len(v) == 0 {
+	if len(v) == 0 {
 		return ""
 	}
 	return v[0]
@@ -122,7 +122,7 @@ func (c *httpContext) GetRequestBodyAsBytes() ([]byte, error) {
 	return b, nil
 }
 
-func (c *httpContext) GetRequestBodyAsStrings() (string, error) {
+func (c *httpContext) GetRequestBodyAsString() (string, error) {
 	bytes, err := c.GetRequestBodyAsBytes()
 	if err != nil {
 		return "", err
