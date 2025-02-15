@@ -73,6 +73,9 @@ func (s *unixServer) Serve() error {
 	if err != nil {
 		return err
 	}
+	if err := os.Chmod(s.socketFile, 0666); err != nil {
+		return err
+	}
 	serve(&s.Server, l, s.errorChan)
 	return nil
 }
