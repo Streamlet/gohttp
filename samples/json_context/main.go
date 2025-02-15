@@ -10,5 +10,5 @@ func main() {
 	application.Handle("/success", SuccessWithDataHandler)
 	application.Handle("/error", ErrorHandler)
 	application.Handle("/error_message", ErrorWithMessageHandler)
-	application.ServePort(80)
+	application.ServeTcp(":80")
 }

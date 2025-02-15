@@ -30,7 +30,7 @@ func main() {
 	application.Handle("/redis_get", RedisGetHandler)
 	application.Handle("/redis_set", RedisSetHandler)
 	application.Handle("/mysql", DbHandler)
-	application.ServePort(80)
+	application.ServeTcp(":80")
 
 	_ = mysql.Close()
 	_ = rc.Close()

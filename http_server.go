@@ -3,7 +3,6 @@ package gohttp
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -14,32 +13,32 @@ type HttpServer interface {
 	Shutdown() error
 }
 
-func NewPortServer(port uint, handler http.Handler, errorChan chan error) HttpServer {
-	server := new(portServer)
+func NewTcpServer(address string, handler http.Handler, errorChan chan error) HttpServer {
+	server := new(tcpServer)
 	server.Handler = handler
-	server.port = port
+	server.address = address
 	server.errorChan = errorChan
 	return server
 }
 
-func NewSockServer(sock string, handler http.Handler, errorChan chan error) HttpServer {
-	server := new(sockServer)
+func NewUnixServer(socketFile string, handler http.Handler, errorChan chan error) HttpServer {
+	server := new(unixServer)
 	server.Handler = handler
-	server.sock = sock
+	server.socketFile = socketFile
 	server.errorChan = errorChan
 	return server
 }
 
-type portServer struct {
+type tcpServer struct {
 	http.Server
-	port      uint
+	address   string
 	errorChan chan error
 }
 
-type sockServer struct {
+type unixServer struct {
 	http.Server
-	sock      string
-	errorChan chan error
+	socketFile string
+	errorChan  chan error
 }
 
 func serve(s *http.Server, l net.Listener, errorChan chan error) {
@@ -55,8 +54,8 @@ func shutdown(s *http.Server) error {
 	return s.Shutdown(context.Background())
 }
 
-func (s *portServer) Serve() error {
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
+func (s *tcpServer) Serve() error {
+	l, err := net.Listen("tcp", s.address)
 	if err != nil {
 		return err
 	}
@@ -64,13 +63,13 @@ func (s *portServer) Serve() error {
 	return nil
 }
 
-func (s *portServer) Shutdown() error {
+func (s *tcpServer) Shutdown() error {
 	return shutdown(&s.Server)
 }
 
-func (s *sockServer) Serve() error {
-	_ = os.Remove(s.sock)
-	l, err := net.Listen("unix", s.sock)
+func (s *unixServer) Serve() error {
+	_ = os.Remove(s.socketFile)
+	l, err := net.Listen("unix", s.socketFile)
 	if err != nil {
 		return err
 	}
@@ -78,8 +77,8 @@ func (s *sockServer) Serve() error {
 	return nil
 }
 
-func (s *sockServer) Shutdown() error {
+func (s *unixServer) Shutdown() error {
 	err := shutdown(&s.Server)
-	_ = os.Remove(s.sock)
+	_ = os.Remove(s.socketFile)
 	return err
 }
