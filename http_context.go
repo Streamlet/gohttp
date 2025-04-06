@@ -165,7 +165,7 @@ func (c *httpContext) String(response string) {
 }
 
 func (c *httpContext) Xml(r interface{}) {
-	xmlString, err := xml.Marshal(r)
+	xmlBytes, err := xml.Marshal(r)
 	if err != nil {
 		log.Println("failed to encode xml", err.Error(), r)
 		c.responseWriter.WriteHeader(http.StatusInternalServerError)
@@ -174,9 +174,13 @@ func (c *httpContext) Xml(r interface{}) {
 
 	c.responseWriter.Header().Add("Content-Type", "application/xml; charset=utf-8")
 	c.responseWriter.WriteHeader(http.StatusOK)
-	_, err = c.responseWriter.Write(xmlString)
+	_, err = c.responseWriter.Write([]byte(xml.Header))
 	if err != nil {
-		log.Println("failed to write response", err.Error(), string(xmlString))
+		log.Println("failed to write response", err.Error())
+	}
+	_, err = c.responseWriter.Write(xmlBytes)
+	if err != nil {
+		log.Println("failed to write response", err.Error(), string(xmlBytes))
 	}
 }
 
