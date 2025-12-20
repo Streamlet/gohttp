@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	DefaultSessionExpireMinutes = 5
+)
+
 type CacheProvider interface {
 	Exists(key string) bool
 	HExists(key, field string) bool
@@ -40,6 +44,7 @@ func (sm *sessionManager) GetSession(sessionId string) Session {
 
 func (sm *sessionManager) CreateSession() (string, Session) {
 	sessionId := generateSessionId()
+	sm.cacheProvider.HSet(sessionId, "", nil, time.Minute*DefaultSessionExpireMinutes)
 	return sessionId, newSession(sessionId, sm.cacheProvider)
 }
 
