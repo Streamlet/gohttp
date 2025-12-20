@@ -23,6 +23,7 @@ type BasicContext interface {
 }
 
 type Session interface {
+	Id() string
 	Exists(key string) bool
 	Get(key string) interface{}
 	Set(key string, value interface{}, expiration time.Duration)

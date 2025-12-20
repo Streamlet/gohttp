@@ -58,6 +58,10 @@ func newSession(sessionId string, provider CacheProvider) Session {
 	return &session{sessionId, provider}
 }
 
+func (s *session) Id() string {
+	return s.sessionId
+}
+
 func (s *session) Exists(key string) bool {
 	return s.provider.HExists(s.sessionId, key)
 }
