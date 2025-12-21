@@ -12,7 +12,7 @@ import (
 var static embed.FS
 
 func main() {
-	application := gohttp.NewApplication[gohttp.HttpContext](gohttp.NewContextFactory(nil))
+	application := gohttp.NewApplication[gohttp.HttpContext](gohttp.NewContextFactory(nil, ""))
 	application.RawHandle("/", http.FileServer(http.FS(static)))
 	application.ServeTcp(":80")
 }

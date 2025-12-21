@@ -16,19 +16,20 @@ type ContextFactory[T HttpContext] interface {
 	NewContext(w http.ResponseWriter, r *http.Request) T
 }
 
-func NewContextFactory(cp CacheProvider) ContextFactory[HttpContext] {
+func NewContextFactory(cp CacheProvider, cookieDomain string) ContextFactory[HttpContext] {
 	if cp == nil {
 		cp = newMemoryCache()
 	}
-	return &contextFactory{NewSessionManager(cp)}
+	return &contextFactory{NewSessionManager(cp), cookieDomain}
 }
 
 type contextFactory struct {
 	sessionManager SessionManager
+	cookieDomain   string
 }
 
 func (cf *contextFactory) NewContext(w http.ResponseWriter, r *http.Request) HttpContext {
-	return NewHttpContext(w, r, cf.sessionManager)
+	return NewHttpContext(w, r, cf.sessionManager, cf.cookieDomain)
 }
 
 func NewRouter[T HttpContext](cf ContextFactory[T]) RouterInterface[T] {

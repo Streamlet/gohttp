@@ -7,5 +7,5 @@ import (
 func main() {
 	application := gohttp.NewApplication[HttpContext](NewContextFactory())
 	application.Handle("/", CustomContextHandler)
-	application.ServePort(80)
+	application.ServeTcp(":80")
 }

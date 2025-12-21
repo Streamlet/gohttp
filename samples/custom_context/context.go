@@ -21,7 +21,7 @@ type contextFactory struct {
 
 func (cf *contextFactory) NewContext(w http.ResponseWriter, r *http.Request) HttpContext {
 	return &httpContext{
-		gohttp.NewHttpContext(w, r, cf.sm),
+		gohttp.NewHttpContext(w, r, cf.sm, ""),
 	}
 }
 
