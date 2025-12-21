@@ -48,11 +48,12 @@ type ResponseWriter interface {
 	Json(r interface{})
 }
 
-func NewHttpContext(w http.ResponseWriter, r *http.Request, sm SessionManager) HttpContext {
+func NewHttpContext(w http.ResponseWriter, r *http.Request, sm SessionManager, cookieDomain string) HttpContext {
 	return &httpContext{
 		responseWriter: w,
 		request:        r,
 		sessionManager: sm,
+		cookieDomain:   cookieDomain,
 	}
 }
 
@@ -60,6 +61,7 @@ type httpContext struct {
 	responseWriter http.ResponseWriter
 	request        *http.Request
 	sessionManager SessionManager
+	cookieDomain   string
 }
 
 func (c *httpContext) Close() error {
@@ -85,10 +87,17 @@ func (c *httpContext) Session() Session {
 	var sid string
 	if session == nil {
 		sid, session = c.sessionManager.CreateSession()
-		cookie := http.Cookie{Name: CookieSession, Value: sid, Path: "/"}
-		if c.request.URL.Scheme == "https" {
-			cookie.SameSite = http.SameSiteNoneMode
-			cookie.Secure = true
+		cookie := http.Cookie{
+			Name:     CookieSession,
+			Value:    sid,
+			Path:     "/",
+			Domain:   c.cookieDomain,
+			Secure:   c.request.URL.Scheme == "https",
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+		}
+		if c.cookieDomain != "" {
+			cookie.Domain = c.cookieDomain
 		}
 		http.SetCookie(c.responseWriter, &cookie)
 	}
