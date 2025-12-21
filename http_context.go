@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"regexp"
 	"time"
 )
 
@@ -97,7 +98,13 @@ func (c *httpContext) Session() Session {
 			SameSite: http.SameSiteLaxMode,
 		}
 		if c.cookieDomain != "" {
-			cookie.Domain = c.cookieDomain
+			if c.cookieDomain[0] == '~' {
+				if re, err := regexp.Compile(c.cookieDomain[1:]); err == nil {
+					cookie.Domain = re.FindString(c.request.URL.Host)
+				}
+			} else {
+				cookie.Domain = c.cookieDomain
+			}
 		}
 		http.SetCookie(c.responseWriter, &cookie)
 	}
