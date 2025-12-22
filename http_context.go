@@ -102,7 +102,7 @@ func (c *httpContext) Session() Session {
 				if re, err := regexp.Compile(c.cookieDomain[1:]); err == nil {
 					cookie.Domain = re.FindString(c.request.Host)
 				} else {
-					log.Panicln("failed to compile regexp:", c.cookieDomain[1:]))
+					log.Panicln("failed to compile regexp:", c.cookieDomain[1:])
 				}
 			} else {
 				cookie.Domain = c.cookieDomain
