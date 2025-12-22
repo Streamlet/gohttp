@@ -93,14 +93,16 @@ func (c *httpContext) Session() Session {
 			Value:    sid,
 			Path:     "/",
 			Domain:   c.cookieDomain,
-			Secure:   c.request.URL.Scheme == "https",
+			Secure:   c.request.TLS != nil || c.request.Header.Get("X-Forwarded-Proto") == "https",
 			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
 		}
 		if c.cookieDomain != "" {
 			if c.cookieDomain[0] == '~' {
 				if re, err := regexp.Compile(c.cookieDomain[1:]); err == nil {
-					cookie.Domain = re.FindString(c.request.URL.Host)
+					cookie.Domain = re.FindString(c.request.Host)
+				} else {
+					log.Panicln("failed to compile regexp:", c.cookieDomain[1:]))
 				}
 			} else {
 				cookie.Domain = c.cookieDomain
