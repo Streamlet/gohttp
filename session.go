@@ -36,6 +36,7 @@ type sessionManager struct {
 
 func (sm *sessionManager) GetSession(sessionId string) Session {
 	if sm.cacheProvider.Exists(sessionId) {
+		sm.cacheProvider.HSet(sessionId, "", nil, time.Minute*DefaultSessionExpireMinutes)
 		return newSession(sessionId, sm.cacheProvider)
 	} else {
 		return nil
