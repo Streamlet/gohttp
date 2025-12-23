@@ -21,6 +21,10 @@ func (mc *memoryCache) Exists(key string) bool {
 	return ok
 }
 
+func (mc *memoryCache) Touch(key string, expiration time.Duration) {
+	mc.cache[key][""] = cacheItem{nil, time.Now(), expiration}
+}
+
 func (mc *memoryCache) HExists(key, field string) bool {
 	session, ok := mc.cache[key]
 	if !ok {

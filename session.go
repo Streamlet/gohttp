@@ -13,6 +13,7 @@ const (
 
 type CacheProvider interface {
 	Exists(key string) bool
+	Touch(key string, expiration time.Duration)
 	HExists(key, field string) bool
 	HGet(key, field string) interface{}
 	HSet(key, field string, value interface{}, expiration time.Duration)
@@ -36,7 +37,7 @@ type sessionManager struct {
 
 func (sm *sessionManager) GetSession(sessionId string) Session {
 	if sm.cacheProvider.Exists(sessionId) {
-		sm.cacheProvider.HSet(sessionId, "", nil, time.Minute*DefaultSessionExpireMinutes)
+		sm.cacheProvider.Touch(sessionId, time.Minute*DefaultSessionExpireMinutes)
 		return newSession(sessionId, sm.cacheProvider)
 	} else {
 		return nil
@@ -45,7 +46,7 @@ func (sm *sessionManager) GetSession(sessionId string) Session {
 
 func (sm *sessionManager) CreateSession() (string, Session) {
 	sessionId := generateSessionId()
-	sm.cacheProvider.HSet(sessionId, "", nil, time.Minute*DefaultSessionExpireMinutes)
+	sm.cacheProvider.Touch(sessionId, time.Minute*DefaultSessionExpireMinutes)
 	return sessionId, newSession(sessionId, sm.cacheProvider)
 }
 
