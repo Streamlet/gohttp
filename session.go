@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DefaultSessionExpireMinutes = 5
+	DefaultSessionExpireMinutes = 30
 )
 
 type CacheProvider interface {
